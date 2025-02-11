@@ -7,6 +7,7 @@ const routes = require('./Routes/routes')
 
 const User = require('./Models/User');
 
+
 const app = express();
 
 app.use(cors({
