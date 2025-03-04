@@ -2,10 +2,9 @@ const db = require('../DBConfig/db_config');
 const {Sequelize, DataTypes} = require('sequelize');
 
 const Users = db.define('User', {
-    id:{
+    email:{
         primaryKey: true,
-        autoIncrement: true,
-        type: DataTypes.INTEGER
+        type: DataTypes.STRING
     },
 
     firstName: {
@@ -15,7 +14,7 @@ const Users = db.define('User', {
 
     lastName: {
         type: DataTypes.STRING,
-        allowNul: false
+        allowNull: false
     },
 
     role: {
@@ -23,15 +22,11 @@ const Users = db.define('User', {
         allowNull: false
     },
 
-    email: {
-        type: DataTypes.TEXT,
+    password: {
+        type: DataTypes.STRING,
         allowNull: false
-    },
-
-    phone: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
     }
+    
 })
 
 module.exports = {Users}
