@@ -17,7 +17,7 @@ const Vehicles = db.define('Vehicle', {
         type: DataTypes.SMALLINT,
         allowNul: false,
         validate: {
-            min: 0, //ensures only non-negative values
+            min: 0, 
             max(value) {
                 const currentYear = new Date().getFullYear(); 
                 if (value > currentYear) {

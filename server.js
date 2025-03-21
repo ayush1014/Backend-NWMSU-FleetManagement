@@ -6,12 +6,14 @@ const db = require('./DBConfig/db_config');
 const routes = require('./Routes/routes')
 
 const User = require('./Models/User');
+const Vehicle = require('./Models/Vehicle')
 
 
 const app = express();
 
 app.use(cors({
     origin: process.env.ORIGIN,
+    credentials: true
 }));
 
 app.use(express.json());

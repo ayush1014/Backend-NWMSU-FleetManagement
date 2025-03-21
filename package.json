@@ -4,17 +4,21 @@
   "description": "Fleet Management System(NWMSU)",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon"
   },
   "author": "Ayush Kanaujia",
   "license": "ISC",
   "dependencies": {
+    "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "gitignore": "^0.7.0",
     "http": "^0.0.1-security",
+    "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.12.0",
+    "nodemon": "^3.1.9",
     "sequelize": "^6.37.5"
   }
 }
