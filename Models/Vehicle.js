@@ -50,7 +50,7 @@ const Vehicles = db.define('Vehicle', {
     },
 
     weight: {
-        type: DataTypes.BOOLEAN,
+        type: DataTypes.STRING,
         allowNull: false,
     },
 
@@ -65,9 +65,29 @@ const Vehicles = db.define('Vehicle', {
     },
 
     isExempt: {
-        type: DataTypes.BOOLEAN,
+        type: DataTypes.STRING,
         allowNull: false
+    },
+
+    vehiclePic: {
+        type: DataTypes.TEXT,
+        allowNull: true
+    },
+
+    vehicleDepartment: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+
+    color: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+
+    licensePlate: {
+        type: DataTypes.STRING,
+        allowNull: true
     }
 })
 
-module.exports = {Vehicles}
+module.exports = Vehicles;

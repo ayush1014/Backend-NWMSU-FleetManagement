@@ -51,6 +51,7 @@ const Login = async(req,res)=>{
                 firstName: user.firstName,
                 lastName: user.lastName,
                 role: user.role,
+                profile_pic: user.profile_pic,
             }
         })
     }else{

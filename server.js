@@ -6,7 +6,8 @@ const db = require('./DBConfig/db_config');
 const routes = require('./Routes/routes')
 
 const User = require('./Models/User');
-const Vehicle = require('./Models/Vehicle')
+const Vehicle = require('./Models/Vehicle');
+const Refueling = require('./Models/Refueling');
 
 
 const app = express();
@@ -28,6 +29,14 @@ app.get('/',(req,res)=>{
         message: 'NWMSU Fleet Management Backend Server is running well and good; All the api\'s are working prefectly and smooth'
     })
 });
+
+// db.sync({ alter: true })
+//   .then(() => {
+//     console.log('Database schema updated successfully.');
+//   })
+//   .catch((error) => {
+//     console.error('Error updating database schema:', error);
+//   });
 
 db.sync().then(()=>{
         console.log('database is synced and running well');

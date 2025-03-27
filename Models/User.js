@@ -25,6 +25,11 @@ const Users = db.define('User', {
     password: {
         type: DataTypes.STRING,
         allowNull: false
+    },
+
+    profile_pic: {
+        type: DataTypes.TEXT,
+        allowNull: true
     }
     
 })
