@@ -3,8 +3,8 @@ const { DataTypes } = require('sequelize');
 const Vehicle = require('../Models/Vehicle');
 const Users = require('../Models/User');
 
-const Refueling = db.define('Refueling', {
-    refuelingId: {
+const Maintainence = db.define('Maintainence', {
+    maintainenceId: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
@@ -14,7 +14,7 @@ const Refueling = db.define('Refueling', {
         type: DataTypes.STRING,
         allowNull: false,
         references: {
-            model: 'Vehicles', 
+            model: 'Vehicle', 
             key: 'NWVehicleNo'
         }
     },
@@ -29,14 +29,11 @@ const Refueling = db.define('Refueling', {
             min: 0
         }
     },
-    fuelAdded: {
-        type: DataTypes.INTEGER,
+    maintainenceDescription: {
+        type: DataTypes.STRING,
         allowNull: false,
-        validate: {
-            min: 0
-        }
     },
-    fuelCost: {
+    maintainenceCost: {
         type: DataTypes.INTEGER,
         allowNull: false,
         validate: {
@@ -47,7 +44,7 @@ const Refueling = db.define('Refueling', {
         type: DataTypes.STRING,
         allowNull: true
     },
-    refueledBy: {
+    maintainenceBy: {
         type: DataTypes.STRING,
         allowNull: false,
         references: {
@@ -57,10 +54,12 @@ const Refueling = db.define('Refueling', {
     }
 });
 
-Users.hasMany(Refueling, { foreignKey: 'refueledBy' });
-Refueling.belongsTo(Users, { foreignKey: 'refueledBy' });
-Vehicle.hasMany(Refueling, { foreignKey: 'NWVehicleNo' });
-Refueling.belongsTo(Vehicle, { foreignKey: 'NWVehicleNo' });
+Users.hasMany(Maintainence, { foreignKey: 'maintainenceBy' });
+Maintainence.belongsTo(Users, { foreignKey: 'maintainenceBy' });
 
-module.exports = Refueling;
+Vehicle.hasMany(Maintainence, { foreignKey: 'NWVehicleNo' });
+Maintainence.belongsTo(Vehicle, { foreignKey: 'NWVehicleNo' });
+
+module.exports = Maintainence;
+
 

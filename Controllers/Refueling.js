@@ -1,15 +1,23 @@
 const Refueling = require('../Models/Refueling');
+const Users = require('../Models/User');
+const Vehicle = require('../Models/Vehicle');
 
 const addRefueling = async (req, res) => {
     try {
-        const { NWVehicleNo, date, currentMileage, fuelAdded, fuelCost } = req.body;
+        const { NWVehicleNo, date, currentMileage, fuelAdded, fuelCost, refueledBy } = req.body;
+        const userExists = await Users.findByPk(refueledBy);
+        if (!userExists) {
+            return res.status(404).send('User not found');
+        }
+
         const newRefueling = await Refueling.create({
             NWVehicleNo,
             date,
             currentMileage,
             fuelAdded,
             fuelCost,
-            receiptImage: req.file ? req.file.path : null  
+            refueledBy,
+            receiptImage: req.file ? req.file.location : null 
         });
 
         res.status(201).json(newRefueling);
@@ -54,5 +62,58 @@ const deleteRefueling = async (req, res) => {
     }
 };
 
+const showRefueling = async (req, res) => {
+    try {
+        const refuelings = await Refueling.findAll({
+            include: [
+                {
+                    model: Users,  
+                },
+                {
+                    model: Vehicle,
+                }
+            ]
+        });
 
-module.exports = { addRefueling, editRefueling, deleteRefueling }
+        if (refuelings.length > 0) {
+            res.status(200).json(refuelings);
+        } else {
+            res.status(404).send('No refueling records found');
+        }
+    } catch (error) {
+        console.error('Error fetching refueling records:', error);
+        res.status(500).send('Internal Server Error');
+    }
+};
+
+const showRefuelingForVehicle = async (req, res) => {
+    const { NWVehicleNo } = req.params; 
+
+    try {
+        const refuelings = await Refueling.findAll({
+            include: [
+                {
+                    model: Users,
+                    attributes: ['email', 'firstName', 'lastName', 'profile_pic'], 
+                },
+                {
+                    model: Vehicle
+                }
+            ],
+            where: { NWVehicleNo: NWVehicleNo }  
+        });
+
+        if (refuelings.length > 0) {
+            res.status(200).json(refuelings);
+        } else {
+            res.status(404).send('No refueling records found for the specified vehicle');
+        }
+    } catch (error) {
+        console.error('Error fetching refueling records for vehicle:', error);
+        res.status(500).send('Internal Server Error');
+    }
+};
+
+
+
+module.exports = { addRefueling, editRefueling, deleteRefueling, showRefueling, showRefuelingForVehicle }

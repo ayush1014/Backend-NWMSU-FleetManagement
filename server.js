@@ -8,6 +8,7 @@ const routes = require('./Routes/routes')
 const User = require('./Models/User');
 const Vehicle = require('./Models/Vehicle');
 const Refueling = require('./Models/Refueling');
+const Maintainence = require('./Models/Maintainence');
 
 
 const app = express();

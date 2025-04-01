@@ -1,5 +1,8 @@
 const {Sequelize, where} = require('sequelize');
 const Vehicles = require('../Models/Vehicle');
+const Refueling = require('../Models/Refueling');
+const Users = require('../Models/User');
+const Maintainence = require('../Models/Maintainence');
 
 const AddVehicle = async (req, res) => {
     try {
@@ -65,4 +68,43 @@ const GetRecentVehicles = async (req, res)=>{
     }
 };
 
-module.exports = {AddVehicle, GetAllVehicles, GetRecentVehicles}
+const getVehicleProfile = async (req, res) => {
+    const { NWVehicleNo } = req.params; 
+
+    try {
+        const vehicle = await Vehicles.findOne({
+            where: { NWVehicleNo },
+            include: [
+                {
+                    model: Refueling,
+                    include: [
+                        {
+                            model: Users,
+                            attributes: ['email', 'firstName', 'lastName', 'profile_pic']
+                        }
+                    ]
+                },
+                {
+                    model: Maintainence,
+                    include: [
+                        {
+                            model: Users,
+                            attributes: ['email', 'firstName', 'lastName', 'profile_pic']
+                        }
+                    ]
+                }
+            ]
+        });
+
+        if (!vehicle) {
+            return res.status(404).send('Vehicle not found');
+        }
+
+        res.status(200).json(vehicle);
+    } catch (error) {
+        console.error('Error fetching vehicle profile:', error);
+        res.status(500).send('Internal Server Error');
+    }
+};
+
+module.exports = {AddVehicle, GetAllVehicles, GetRecentVehicles, getVehicleProfile}
