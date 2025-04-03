@@ -6,7 +6,7 @@ const Maintainence = require('../Models/Maintainence');
 
 const AddVehicle = async (req, res) => {
     try {
-        const { NWVehicleNo, VIN, modelYear, make, model, purchaseDate, startingMileage, weight, vehType, vehDescription, isExempt, vehiclePic, vehicleDepartment, color, licensePlate } = req.body;
+        const { NWVehicleNo, VIN, modelYear, make, model, purchaseDate, startingMileage, weight, vehType, vehDescription, isExempt, vehiclePic, vehicleDepartment, color, licensePlate, addBy } = req.body;
 
         const vehCheck = await Vehicles.findOne({
             where: { NWVehicleNo: NWVehicleNo }
@@ -31,7 +31,8 @@ const AddVehicle = async (req, res) => {
             vehiclePic: req.file ? req.file.location : null,
             vehicleDepartment,
             color,
-            licensePlate
+            licensePlate,
+            addBy
         });
 
         res.status(201).json(newVehicle);
@@ -69,7 +70,7 @@ const GetRecentVehicles = async (req, res)=>{
 };
 
 const getVehicleProfile = async (req, res) => {
-    const { NWVehicleNo } = req.params; 
+    const { NWVehicleNo } = req.params;
 
     try {
         const vehicle = await Vehicles.findOne({
@@ -92,6 +93,11 @@ const getVehicleProfile = async (req, res) => {
                             attributes: ['email', 'firstName', 'lastName', 'profile_pic']
                         }
                     ]
+                },
+                {
+                    model: Users,
+                    as: 'User', // You can remove this if you don't use an alias
+                    attributes: ['email', 'firstName', 'lastName', 'profile_pic'],
                 }
             ]
         });
@@ -106,5 +112,6 @@ const getVehicleProfile = async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 };
+
 
 module.exports = {AddVehicle, GetAllVehicles, GetRecentVehicles, getVehicleProfile}

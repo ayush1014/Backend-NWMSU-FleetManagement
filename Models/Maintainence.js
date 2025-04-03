@@ -13,10 +13,6 @@ const Maintainence = db.define('Maintainence', {
     NWVehicleNo: {
         type: DataTypes.STRING,
         allowNull: false,
-        references: {
-            model: 'Vehicle', 
-            key: 'NWVehicleNo'
-        }
     },
     date: {
         type: DataTypes.DATEONLY,
@@ -47,10 +43,6 @@ const Maintainence = db.define('Maintainence', {
     maintainenceBy: {
         type: DataTypes.STRING,
         allowNull: false,
-        references: {
-            model: 'Users', 
-            key: 'email'
-        }
     }
 });
 

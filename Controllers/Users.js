@@ -1,5 +1,8 @@
 const bcrypt = require('bcryptjs');
 const User = require('../Models/User');
+const Vehicle = require('../Models/Vehicle');
+const Maintainence = require('../Models/Maintainence');
+const Refueling = require('../Models/Refueling');
 const { sendEmail } = require('./PasswordSMTP');
 const { upload, makePublicRead } = require('./S3Service');
 
@@ -12,10 +15,10 @@ const generatePassword = () => {
     return password;
 };
 
-const AddUser = async(req, res) => {
+const AddUser = async (req, res) => {
     const { firstName, lastName, email, role } = req.body;
     try {
-        const userExists = await User.findOne({ where: { email: email }});
+        const userExists = await User.findOne({ where: { email: email } });
         if (userExists) {
             return res.status(409).send('User already exists, Please try with another email.');
         }
@@ -29,7 +32,7 @@ const AddUser = async(req, res) => {
             email,
             role,
             password: hashedPassword,
-            profile_pic: req.file ? req.file.location : null 
+            profile_pic: req.file ? req.file.location : null
         });
 
         await sendEmail(email, tempPassword);
@@ -45,8 +48,31 @@ const AddUser = async(req, res) => {
 const ShowUsers = async (req, res) => {
     try {
         const users = await User.findAll({
-            attributes: { exclude: ['password'] } 
-        });
+            attributes: { exclude: ['password'] },
+            include: [
+                {
+                    model: Refueling,
+                    include: [
+                        {
+                            model: Vehicle,
+                        }
+                    ]
+                },
+                {
+                    model: Maintainence,
+                    include: [
+                        {
+                            model: Vehicle,
+                        }
+                    ]
+                },
+                {
+                    model: Vehicle
+                }
+            ]
+
+        }
+        );
         res.status(200).json(users);
     } catch (error) {
         console.error('Error showing the users due to technical error:', error);

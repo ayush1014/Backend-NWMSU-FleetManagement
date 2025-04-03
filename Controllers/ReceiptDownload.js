@@ -60,10 +60,12 @@ const Receipt = async (req, res) => {
     maintenances.forEach(maintenance => {
         if (maintenance.receiptImage) {
             const filePath = `Maintenance Receipts/${maintenance.date}/${path.basename(maintenance.receiptImage)}`;
+            console.log('filePath', filePath)
             appendPromises.push(appendRemoteFile(archive, maintenance.receiptImage, filePath));
         }
     });
-
+    console.log('Maintenece events: ', maintenances)
+    
     await Promise.all(appendPromises);
     archive.finalize();
 };

@@ -30,6 +30,16 @@ const Users = db.define('User', {
     profile_pic: {
         type: DataTypes.TEXT,
         allowNull: true
+    },
+
+    department: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+
+    title: {
+        type: DataTypes.STRING,
+        allowNull: true
     }
     
 })

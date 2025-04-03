@@ -1,5 +1,6 @@
 const db = require('../DBConfig/db_config');
 const {Sequelize, DataTypes} = require('sequelize');
+const Users = require('../Models/User');
 
 const Vehicles = db.define('Vehicle', {
     NWVehicleNo:{
@@ -87,7 +88,16 @@ const Vehicles = db.define('Vehicle', {
     licensePlate: {
         type: DataTypes.STRING,
         allowNull: true
+    },
+
+    addBy: {
+        type: DataTypes.STRING,
+        allowNull: false,
     }
 })
+
+Users.hasMany(Vehicles, { foreignKey: 'addBy' });
+Vehicles.belongsTo(Users, { foreignKey: 'addBy' });
+
 
 module.exports = Vehicles;

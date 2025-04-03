@@ -25,11 +25,11 @@ app.use(express.urlencoded({
 
 app.use('/nwmsu/fleet_management', routes);
 
-app.get('/',(req,res)=>{
-    res.json({
-        message: 'NWMSU Fleet Management Backend Server is running well and good; All the api\'s are working prefectly and smooth'
-    })
-});
+// app.get('/',(req,res)=>{
+//     res.json({
+//         message: 'NWMSU Fleet Management Backend Server is running well and good; All the api\'s are working prefectly and smooth'
+//     })
+// });
 
 // db.sync({ alter: true })
 //   .then(() => {
