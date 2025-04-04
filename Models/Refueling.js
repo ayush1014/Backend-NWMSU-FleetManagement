@@ -19,7 +19,7 @@ const Refueling = db.define('Refueling', {
         }
     },
     date: {
-        type: DataTypes.DATEONLY,
+        type: DataTypes.DATE,
         allowNull: false
     },
     currentMileage: {

@@ -5,19 +5,27 @@ const Vehicle = require('../Models/Vehicle');
 const addRefueling = async (req, res) => {
     try {
         const { NWVehicleNo, date, currentMileage, fuelAdded, fuelCost, refueledBy } = req.body;
+
         const userExists = await Users.findByPk(refueledBy);
         if (!userExists) {
             return res.status(404).send('User not found');
         }
 
+        if (isNaN(Date.parse(date))) {
+            return res.status(400).send('Invalid date format');
+        }
+
+        // Force the date to UTC
+        const dateUTC = new Date(date + 'T00:00:00Z').toISOString();
+
         const newRefueling = await Refueling.create({
             NWVehicleNo,
-            date,
+            date: dateUTC,
             currentMileage,
             fuelAdded,
             fuelCost,
             refueledBy,
-            receiptImage: req.file ? req.file.location : null 
+            receiptImage: req.file ? req.file.location : null
         });
 
         res.status(201).json(newRefueling);
@@ -26,6 +34,8 @@ const addRefueling = async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 };
+
+
 
 const editRefueling = async (req, res) => {
     const { refuelingId } = req.params;
@@ -67,7 +77,7 @@ const showRefueling = async (req, res) => {
         const refuelings = await Refueling.findAll({
             include: [
                 {
-                    model: Users,  
+                    model: Users,
                 },
                 {
                     model: Vehicle,
@@ -87,20 +97,20 @@ const showRefueling = async (req, res) => {
 };
 
 const showRefuelingForVehicle = async (req, res) => {
-    const { NWVehicleNo } = req.params; 
+    const { NWVehicleNo } = req.params;
 
     try {
         const refuelings = await Refueling.findAll({
             include: [
                 {
                     model: Users,
-                    attributes: ['email', 'firstName', 'lastName', 'profile_pic'], 
+                    attributes: ['email', 'firstName', 'lastName', 'profile_pic'],
                 },
                 {
                     model: Vehicle
                 }
             ],
-            where: { NWVehicleNo: NWVehicleNo }  
+            where: { NWVehicleNo: NWVehicleNo }
         });
 
         if (refuelings.length > 0) {
