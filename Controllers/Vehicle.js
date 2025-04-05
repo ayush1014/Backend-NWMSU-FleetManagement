@@ -1,4 +1,4 @@
-const {Sequelize, where} = require('sequelize');
+const { Sequelize, where } = require('sequelize');
 const Vehicles = require('../Models/Vehicle');
 const Refueling = require('../Models/Refueling');
 const Users = require('../Models/User');
@@ -9,19 +9,23 @@ const AddVehicle = async (req, res) => {
         const { NWVehicleNo, VIN, modelYear, make, model, purchaseDate, startingMileage, weight, vehType, vehDescription, isExempt, vehiclePic, vehicleDepartment, color, licensePlate, addBy } = req.body;
 
         const vehCheck = await Vehicles.findOne({
-            where: { NWVehicleNo: NWVehicleNo }
+            where: { NWVehicleNo }
         });
 
         if (vehCheck) {
             return res.status(409).send('Vehicle already exists');
         }
 
-        if (isNaN(Date.parse(purchaseDate))) {
+        // Convert incoming date to Date object directly, handle full date string including time zone
+        const dateObj = new Date(purchaseDate);
+
+        // Check if the date object is valid
+        if (isNaN(dateObj.getTime())) {
             return res.status(400).send('Invalid date format');
         }
 
-        // Force the date to UTC
-        const dateUTC = new Date(purchaseDate + 'T00:00:00Z').toISOString();
+        // Convert to ISO string for UTC standardized format
+        const dateUTC = dateObj.toISOString();
 
         const newVehicle = await Vehicles.create({
             NWVehicleNo,
@@ -48,7 +52,10 @@ const AddVehicle = async (req, res) => {
         console.error('Internal server error', err);
         res.status(500).send('Internal Server Error');
     }
-}
+};
+
+
+
 
 const GetAllVehicles = async (req, res) => {
     try {
@@ -63,14 +70,14 @@ const GetAllVehicles = async (req, res) => {
     }
 };
 
-const GetRecentVehicles = async (req, res)=>{
+const GetRecentVehicles = async (req, res) => {
     try {
         const recentVehicles = await Vehicles.findAll({
             limit: 4,
-            order: [['createdAt','DESC']]
+            order: [['createdAt', 'DESC']]
         });
         res.status(200).json(recentVehicles);
-    } catch (error){
+    } catch (error) {
         console.error('Failed to fetch recent vehicles:', error);
         res.status(500).send('Internal Server Error');
     }
@@ -103,7 +110,7 @@ const getVehicleProfile = async (req, res) => {
                 },
                 {
                     model: Users,
-                    as: 'User', 
+                    as: 'User',
                     attributes: ['email', 'firstName', 'lastName', 'profile_pic'],
                 }
             ]
@@ -154,7 +161,7 @@ const editVehicle = async (req, res) => {
             where: { NWVehicleNo }
         });
 
-        if (updatedVehicle[0] === 0) {  
+        if (updatedVehicle[0] === 0) {
             return res.status(404).send('Vehicle not found');
         }
 
@@ -169,4 +176,4 @@ const editVehicle = async (req, res) => {
 
 
 
-module.exports = {AddVehicle, GetAllVehicles, GetRecentVehicles, getVehicleProfile, deleteVehicle, editVehicle}
+module.exports = { AddVehicle, GetAllVehicles, GetRecentVehicles, getVehicleProfile, deleteVehicle, editVehicle }

@@ -11,12 +11,13 @@ const addMaintainence = async (req, res) => {
         }
 
 
-        if (isNaN(Date.parse(date))) {
+        const dateObj = new Date(date);
+
+        if (isNaN(dateObj.getTime())) {
             return res.status(400).send('Invalid date format');
         }
 
-        // Force the date to UTC
-        const dateUTC = new Date(date + 'T00:00:00Z').toISOString();
+        const dateUTC = dateObj.toISOString();
 
         const newMaintainence = await Maintainence.create({
             NWVehicleNo,
