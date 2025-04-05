@@ -6,17 +6,25 @@ const addRefueling = async (req, res) => {
     try {
         const { NWVehicleNo, date, currentMileage, fuelAdded, fuelCost, refueledBy } = req.body;
 
+
         const userExists = await Users.findByPk(refueledBy);
         if (!userExists) {
             return res.status(404).send('User not found');
         }
 
-        if (isNaN(Date.parse(date))) {
-            return res.status(400).send('Invalid date format');
+
+        const vehicleExists = await Vehicle.findByPk(NWVehicleNo);
+        if (!vehicleExists) {
+            return res.status(404).send('Vehicle not found');
         }
 
-        // Force the date to UTC
-        const dateUTC = new Date(date + 'T00:00:00Z').toISOString();
+
+        const dateObj = new Date(date);
+        if (isNaN(dateObj.getTime())) {
+            return res.status(400).send('Invalid date format');
+        }
+        const dateUTC = dateObj.toISOString();
+
 
         const newRefueling = await Refueling.create({
             NWVehicleNo,
@@ -34,7 +42,6 @@ const addRefueling = async (req, res) => {
         res.status(500).send('Internal Server Error');
     }
 };
-
 
 
 const editRefueling = async (req, res) => {
