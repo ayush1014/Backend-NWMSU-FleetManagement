@@ -25,11 +25,11 @@ app.use(express.urlencoded({
 
 app.use('/nwmsu/fleet_management', routes);
 
-// app.get('/',(req,res)=>{
-//     res.json({
-//         message: 'NWMSU Fleet Management Backend Server is running well and good; All the api\'s are working prefectly and smooth'
-//     })
-// });
+app.get('/',(req,res)=>{
+    res.json({
+        message: 'NWMSU Fleet Management Backend Server is running well and good; All the api\'s are working prefectly and smooth'
+    })
+});
 
 // db.sync({ alter: true })
 //   .then(() => {
@@ -43,12 +43,12 @@ db.sync().then(()=>{
         console.log('database is synced and running well');
 });
 
-const server = http.createServer(app);
-const PORT = process.env.PORT || 8000;
-server.listen(PORT,()=>{
-        console.log(`Server is running well on PORT ${PORT}`)
-    }
-);
+// const server = http.createServer(app);
+// const PORT = process.env.PORT || 8000;
+// server.listen(PORT,()=>{
+//         console.log(`Server is running well on PORT ${PORT}`)
+//     }
+// );
 
 module.exports = (req, res) => {
     app(req,res);
