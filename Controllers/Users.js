@@ -38,7 +38,7 @@ const AddUser = async (req, res) => {
 
         await sendEmail(email, tempPassword);
         console.log('Email sent successfully');
-        res.status(200).send('User added successfully. A temporary password has been sent to your email.');
+        res.status(200).json(newUser);
     } catch (error) {
         console.error('Error adding user:', error);
         res.status(400).send('Technical Issue, Internal Server Error');
