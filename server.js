@@ -43,12 +43,12 @@ db.sync().then(()=>{
         console.log('database is synced and running well');
 });
 
-// const server = http.createServer(app);
-// const PORT = process.env.PORT || 8000;
-// server.listen(PORT,()=>{
-//         console.log(`Server is running well on PORT ${PORT}`)
-//     }
-// );
+const server = http.createServer(app);
+const PORT = process.env.PORT || 8000;
+server.listen(PORT,()=>{
+        console.log(`Server is running well on PORT ${PORT}`)
+    }
+);
 
 module.exports = (req, res) => {
     app(req,res);
