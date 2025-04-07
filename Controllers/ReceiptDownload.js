@@ -29,7 +29,7 @@ async function appendRemoteFile(archive, url, filename) {
 const Receipt = async (req, res) => {
     const vehicleId = req.params.NWVehicleNo;
     console.log('Params: ', vehicleId);
-    const outputPath = path.join(__dirname, `output_${vehicleId}.zip`);
+    const outputPath = path.join('/tmp', `output_${vehicleId}.zip`);
     const output = fs.createWriteStream(outputPath);
     const archive = archiver('zip', { zlib: { level: 9 } });
 
