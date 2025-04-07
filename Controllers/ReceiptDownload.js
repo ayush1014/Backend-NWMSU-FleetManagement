@@ -21,8 +21,10 @@ async function appendRemoteFile(archive, url, filename) {
         archive.append(passThrough, { name: filename });
     }).catch(error => {
         console.error('Failed to fetch or append file:', url, error);
+        throw new Error(`Failed to fetch or append file: ${url}`); 
     });
 }
+
 
 const Receipt = async (req, res) => {
     const vehicleId = req.params.NWVehicleNo;
@@ -48,26 +50,25 @@ const Receipt = async (req, res) => {
     const refuelings = await getRefuelingsForVehicle(vehicleId);
     const maintenances = await getMaintenancesForVehicle(vehicleId);
 
-    const appendPromises = [];
-
-    refuelings.forEach(refuel => {
+    const appendPromises = refuelings.map(refuel => {
         if (refuel.receiptImage) {
             const filePath = `Refueling Receipts/${refuel.date}/${path.basename(refuel.receiptImage)}`;
-            appendPromises.push(appendRemoteFile(archive, refuel.receiptImage, filePath));
+            return appendRemoteFile(archive, refuel.receiptImage, filePath);
         }
-    });
-
-    maintenances.forEach(maintenance => {
+    }).concat(maintenances.map(maintenance => {
         if (maintenance.receiptImage) {
             const filePath = `Maintenance Receipts/${maintenance.date}/${path.basename(maintenance.receiptImage)}`;
-            console.log('filePath', filePath)
-            appendPromises.push(appendRemoteFile(archive, maintenance.receiptImage, filePath));
+            return appendRemoteFile(archive, maintenance.receiptImage, filePath);
         }
-    });
-    console.log('Maintenece events: ', maintenances)
+    }));
     
-    await Promise.all(appendPromises);
-    archive.finalize();
+    try {
+        await Promise.all(appendPromises);
+        archive.finalize();
+    } catch (error) {
+        res.status(500).send("Failed to create archive due to an error with one or more files.");
+    }
+    
 };
 
 async function getRefuelingsForVehicle(vehicleId) {
