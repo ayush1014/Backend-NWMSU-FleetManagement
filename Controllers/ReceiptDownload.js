@@ -26,20 +26,27 @@ async function appendRemoteFile(archive, url, filename) {
 }
 
 
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+        timeZone: 'UTC',
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit'
+    });
+}
+
 const Receipt = async (req, res) => {
     const vehicleId = req.params.NWVehicleNo;
-    console.log('Params: ', vehicleId);
     const outputPath = path.join('/tmp', `output_${vehicleId}.zip`);
     const output = fs.createWriteStream(outputPath);
     const archive = archiver('zip', { zlib: { level: 9 } });
 
     archive.on('error', function(err) {
-        console.log('Archive Error:', err);
         res.status(500).send({ error: 'Error creating archive' });
     });
 
     output.on('close', function() {
-        console.log(`Archive wrote ${archive.pointer()} bytes`);
         res.download(outputPath, () => {
             fs.unlinkSync(outputPath);
         });
@@ -52,12 +59,14 @@ const Receipt = async (req, res) => {
 
     const appendPromises = refuelings.map(refuel => {
         if (refuel.receiptImage) {
-            const filePath = `Refueling Receipts/${refuel.date}/${path.basename(refuel.receiptImage)}`;
+            const formattedDate = formatDate(refuel.date); // Format the date as 'MMM DD YYYY'
+            const filePath = `Refueling Receipts/${formattedDate}/${path.basename(refuel.receiptImage)}`;
             return appendRemoteFile(archive, refuel.receiptImage, filePath);
         }
     }).concat(maintenances.map(maintenance => {
         if (maintenance.receiptImage) {
-            const filePath = `Maintenance Receipts/${maintenance.date}/${path.basename(maintenance.receiptImage)}`;
+            const formattedDate = formatDate(maintenance.date); // Format the date as 'MMM DD YYYY'
+            const filePath = `Maintenance Receipts/${formattedDate}/${path.basename(maintenance.receiptImage)}`;
             return appendRemoteFile(archive, maintenance.receiptImage, filePath);
         }
     }));
@@ -68,8 +77,8 @@ const Receipt = async (req, res) => {
     } catch (error) {
         res.status(500).send("Failed to create archive due to an error with one or more files.");
     }
-    
 };
+
 
 async function getRefuelingsForVehicle(vehicleId) {
     try {
