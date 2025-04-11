@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 const {SignUp, Login} =  require('../Controllers/Authentication');
 const {AddUser, ShowUsers, showUserProfile, editUser, changePassword, passCheck} = require('../Controllers/Users');
-const {AddVehicle, GetAllVehicles, GetRecentVehicles, getVehicleProfile, deleteVehicle, editVehicle} = require('../Controllers/Vehicle');
-const { addRefueling, editRefueling, deleteRefueling, showRefueling, showRefuelingForVehicle } = require('../Controllers/Refueling');
-const { addMaintainence, editMaintainence, deleteMaintainence, showMaintenance, showMaintenanceForVehicle} = require('../Controllers/Maintainence');
+const {AddVehicle, GetAllVehicles, GetRecentVehicles, getVehicleProfile, deleteVehicle, editVehicle, getVehicleRefuelingDataByYear, getVehicleMaintenanceDataByYear, checkVehicleExists} = require('../Controllers/Vehicle');
+const { addRefueling, editRefueling, deleteRefueling, showRefueling, showRefuelingForVehicle, getMonthlyRefuelingData, getAvailableYears } = require('../Controllers/Refueling');
+const { addMaintainence, editMaintainence, deleteMaintainence, showMaintenance, showMaintenanceForVehicle, getMonthlyMaintenanceData, getAvailableMaintenanceYears} = require('../Controllers/Maintainence');
 const {Receipt} = require('../Controllers/ReceiptDownload')
 const { upload, makePublicRead } = require('../Controllers/S3Service');
 
@@ -25,6 +25,8 @@ router.post('/addRefueling', upload.single('receiptImage'), addRefueling);
 router.put('/editRefueling/:refuelingId', upload.single('receiptImage'), editRefueling);
 router.delete('/deleteRefueling/:refuelingId', deleteRefueling);
 router.get('/showRefueling', showRefueling);
+router.get('/refueling/yearly', getMonthlyRefuelingData);
+router.get('/refueling/years', getAvailableYears);
 router.post('/addMaintainence', upload.single('receiptImage'), addMaintainence);
 router.put('/editMaintainence/:maintainenceId', upload.single('receiptImage'), editMaintainence);
 router.delete('/deleteMaintainence/:maintainenceId', deleteMaintainence);
@@ -35,6 +37,11 @@ router.get('/vehicle-profile/:NWVehicleNo', getVehicleProfile);
 router.delete('/vehicles/:NWVehicleNo', deleteVehicle);
 router.put('/vehicles/:NWVehicleNo', upload.single('vehiclePic'), editVehicle);
 router.get('/receipt/:NWVehicleNo', Receipt);
+router.get('/maintenance/years', getAvailableMaintenanceYears);
+router.get('/maintenance/yearly', getMonthlyMaintenanceData);
+router.get('/refueling/vehicle/:NWVehicleNo', getVehicleRefuelingDataByYear);
+router.get('/maintenance/vehicle/:NWVehicleNo', getVehicleMaintenanceDataByYear);
+router.get('/vehiclesCheck/:NWVehicleNo', checkVehicleExists);
 
 
 module.exports = router;

@@ -1,6 +1,7 @@
 const Maintainence = require('../Models/Maintainence');
 const Users = require('../Models/User');
 const Vehicle = require('../Models/Vehicle');
+const { Sequelize, Op } = require('sequelize');
 
 const addMaintainence = async (req, res) => {
     try {
@@ -118,6 +119,86 @@ const showMaintenanceForVehicle = async (req, res) => {
     }
 };
 
+const getAvailableMaintenanceYears = async (req, res) => {
+    try {
+      const maintenances = await Maintainence.findAll({
+        attributes: ['date']
+      });
+  
+      const fiscalYearsSet = new Set();
+  
+      maintenances.forEach(record => {
+        const date = new Date(record.date);
+        const month = date.getMonth(); 
+        const year = date.getFullYear();
+        const fiscalYear = month >= 7 ? year : year - 1;
+  
+        fiscalYearsSet.add(fiscalYear);
+      });
+  
+      const fiscalYears = Array.from(fiscalYearsSet).sort((a, b) => b - a);
+      res.json({
+        years: Array.from(fiscalYearsSet)
+          .sort((a, b) => b - a)
+          .map(year => ({
+            label: `Aug ${year} - Jul ${year + 1}`,
+            value: year
+          }))
+      });      
+    } catch (error) {
+      console.error('Error fetching maintenance years:', error);
+      res.status(500).send('Internal Server Error');
+    }
+  };
+  
+  
+  
+  
+
+  const getMonthlyMaintenanceData = async (req, res) => {
+    const year = req.query.year ? parseInt(req.query.year) : new Date().getFullYear();
+  
+    try {
+      // Fiscal year: Aug of selected year → Jul of next year
+      const startDate = new Date(year, 7, 1);       // August 1st of selected fiscal year
+      const endDate = new Date(year + 1, 6, 31);    // July 31st of the next year
+  
+      const maintenances = await Maintainence.findAll({
+        attributes: [
+          [Sequelize.fn('YEAR', Sequelize.col('date')), 'year'],
+          [Sequelize.fn('MONTH', Sequelize.col('date')), 'month'],
+          [Sequelize.fn('COUNT', Sequelize.col('maintainenceId')), 'maintenanceCount'],
+          [Sequelize.fn('SUM', Sequelize.col('maintainenceCost')), 'totalMaintenanceCost']
+        ],
+        where: {
+          date: {
+            [Op.between]: [startDate, endDate]
+          }
+        },
+        group: [
+          Sequelize.fn('YEAR', Sequelize.col('date')),
+          Sequelize.fn('MONTH', Sequelize.col('date'))
+        ],
+        order: [
+          [Sequelize.fn('YEAR', Sequelize.col('date')), 'ASC'],
+          [Sequelize.fn('MONTH', Sequelize.col('date')), 'ASC']
+        ]
+      });
+  
+      res.json(maintenances.map(item => ({
+        year: item.dataValues.year,
+        month: `${item.dataValues.year}-${item.dataValues.month}`,
+        totalMaintenanceCost: item.dataValues.totalMaintenanceCost,
+        maintenanceCount: item.dataValues.maintenanceCount
+      })));
+    } catch (error) {
+      console.error('Error fetching monthly maintenance data:', error);
+      res.status(500).send('Internal Server Error');
+    }
+  };
+  
+  
 
 
-module.exports = { addMaintainence, editMaintainence, deleteMaintainence, showMaintenance, showMaintenanceForVehicle }
+
+module.exports = { addMaintainence, editMaintainence, deleteMaintainence, showMaintenance, showMaintenanceForVehicle, getAvailableMaintenanceYears, getMonthlyMaintenanceData }

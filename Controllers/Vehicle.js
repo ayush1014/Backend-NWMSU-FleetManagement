@@ -1,4 +1,4 @@
-const { Sequelize, where } = require('sequelize');
+const { Sequelize, where, Op } = require('sequelize');
 const Vehicles = require('../Models/Vehicle');
 const Refueling = require('../Models/Refueling');
 const Users = require('../Models/User');
@@ -172,8 +172,113 @@ const editVehicle = async (req, res) => {
     }
 };
 
+const getVehicleRefuelingDataByYear = async (req, res) => {
+    const year = req.query.year ? parseInt(req.query.year) : new Date().getFullYear();
+    const { NWVehicleNo } = req.params;
+
+    if (!NWVehicleNo) {
+        return res.status(400).send('Vehicle ID (NWVehicleNo) is required');
+    }
+
+    try {
+        const startDate = new Date(year, 7, 1);       
+        const endDate = new Date(year + 1, 6, 31);    
+
+        const refuelings = await Refueling.findAll({
+            attributes: [
+                [Sequelize.fn('YEAR', Sequelize.col('date')), 'year'],
+                [Sequelize.fn('MONTH', Sequelize.col('date')), 'month'],
+                [Sequelize.fn('COUNT', Sequelize.col('refuelingId')), 'refuelingsCount'],
+                [Sequelize.fn('SUM', Sequelize.col('fuelCost')), 'totalFuelCost']
+            ],
+            where: {
+                NWVehicleNo,
+                date: {
+                    [Op.between]: [startDate, endDate]
+                }
+            },
+            group: [
+                Sequelize.fn('YEAR', Sequelize.col('date')),
+                Sequelize.fn('MONTH', Sequelize.col('date'))
+            ],
+            order: [
+                [Sequelize.fn('YEAR', Sequelize.col('date')), 'ASC'],
+                [Sequelize.fn('MONTH', Sequelize.col('date')), 'ASC']
+            ]
+        });
+
+        res.json(refuelings.map(item => ({
+            year: item.dataValues.year,
+            month: `${item.dataValues.year}-${item.dataValues.month}`,
+            totalFuelCost: item.dataValues.totalFuelCost,
+            refuelingsCount: item.dataValues.refuelingsCount
+        })));
+    } catch (error) {
+        console.error('Error fetching vehicle-specific monthly refueling data:', error);
+        res.status(500).send('Internal Server Error');
+    }
+};
+
+
+const getVehicleMaintenanceDataByYear = async (req, res) => {
+    const year = req.query.year ? parseInt(req.query.year) : new Date().getFullYear();
+    const { NWVehicleNo } = req.params;
+
+    if (!NWVehicleNo) {
+        return res.status(400).send('Vehicle ID (NWVehicleNo) is required');
+    }
+
+    try {
+        // Fiscal year 2018 = Aug 2018 – Jul 2019
+        const startDate = new Date(Date.UTC(year, 7, 1, 0, 0, 0));      // Aug 1, 00:00 UTC
+        const endDate = new Date(Date.UTC(year + 1, 6, 31, 23, 59, 59)); // Jul 31, 23:59 UTC
+
+        const maintenances = await Maintainence.findAll({
+            attributes: [
+                [Sequelize.fn('YEAR', Sequelize.col('date')), 'year'],
+                [Sequelize.fn('MONTH', Sequelize.col('date')), 'month'],
+                [Sequelize.fn('COUNT', Sequelize.col('maintainenceId')), 'maintenanceCount'],
+                [Sequelize.fn('SUM', Sequelize.col('maintainenceCost')), 'totalMaintenanceCost']
+            ],
+            where: {
+                NWVehicleNo,
+                date: {
+                    [Op.between]: [startDate, endDate]
+                }
+            },
+            group: [
+                Sequelize.fn('YEAR', Sequelize.col('date')),
+                Sequelize.fn('MONTH', Sequelize.col('date'))
+            ],
+            order: [
+                [Sequelize.fn('YEAR', Sequelize.col('date')), 'ASC'],
+                [Sequelize.fn('MONTH', Sequelize.col('date')), 'ASC']
+            ]
+        });
+
+        res.json(maintenances.map(item => ({
+            year: item.dataValues.year,
+            month: `${item.dataValues.year}-${item.dataValues.month}`,
+            totalMaintenanceCost: item.dataValues.totalMaintenanceCost,
+            maintenanceCount: item.dataValues.maintenanceCount
+        })));
+    } catch (error) {
+        console.error('Error fetching vehicle-specific monthly maintenance data:', error);
+        res.status(500).send('Internal Server Error');
+    }
+};
+
+const checkVehicleExists = async (req, res) => {
+    const { NWVehicleNo } = req.params;
+    const vehicle = await Vehicles.findByPk(NWVehicleNo);
+    if (vehicle) {
+      res.json({ exists: true });
+    } else {
+      res.status(404).json({ exists: false });
+    }
+  };
 
 
 
 
-module.exports = { AddVehicle, GetAllVehicles, GetRecentVehicles, getVehicleProfile, deleteVehicle, editVehicle }
+module.exports = { AddVehicle, GetAllVehicles, GetRecentVehicles, getVehicleProfile, deleteVehicle, editVehicle, getVehicleRefuelingDataByYear, getVehicleMaintenanceDataByYear, checkVehicleExists }
