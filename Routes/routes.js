@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const {SignUp, Login} =  require('../Controllers/Authentication');
 const {AddUser, ShowUsers, showUserProfile, editUser, changePassword, passCheck} = require('../Controllers/Users');
-const {AddVehicle, GetAllVehicles, GetRecentVehicles, getVehicleProfile, deleteVehicle, editVehicle, getVehicleRefuelingDataByYear, getVehicleMaintenanceDataByYear, checkVehicleExists} = require('../Controllers/Vehicle');
+const {AddVehicle, GetAllVehicles, GetRecentVehicles, getVehicleProfile, deleteVehicle, editVehicle, getVehicleRefuelingDataByYear, getVehicleMaintenanceDataByYear, checkVehicleExists, getVehicleReport} = require('../Controllers/Vehicle');
 const { addRefueling, editRefueling, deleteRefueling, showRefueling, showRefuelingForVehicle, getMonthlyRefuelingData, getAvailableYears } = require('../Controllers/Refueling');
 const { addMaintainence, editMaintainence, deleteMaintainence, showMaintenance, showMaintenanceForVehicle, getMonthlyMaintenanceData, getAvailableMaintenanceYears} = require('../Controllers/Maintainence');
 const {Receipt} = require('../Controllers/ReceiptDownload')
@@ -42,6 +42,6 @@ router.get('/maintenance/yearly', getMonthlyMaintenanceData);
 router.get('/refueling/vehicle/:NWVehicleNo', getVehicleRefuelingDataByYear);
 router.get('/maintenance/vehicle/:NWVehicleNo', getVehicleMaintenanceDataByYear);
 router.get('/vehiclesCheck/:NWVehicleNo', checkVehicleExists);
-
+router.post('/vehicle/report', getVehicleReport)
 
 module.exports = router;

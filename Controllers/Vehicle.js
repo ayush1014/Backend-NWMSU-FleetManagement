@@ -181,8 +181,8 @@ const getVehicleRefuelingDataByYear = async (req, res) => {
     }
 
     try {
-        const startDate = new Date(year, 7, 1);       
-        const endDate = new Date(year + 1, 6, 31);    
+        const startDate = new Date(year, 7, 1);
+        const endDate = new Date(year + 1, 6, 31);
 
         const refuelings = await Refueling.findAll({
             attributes: [
@@ -272,13 +272,105 @@ const checkVehicleExists = async (req, res) => {
     const { NWVehicleNo } = req.params;
     const vehicle = await Vehicles.findByPk(NWVehicleNo);
     if (vehicle) {
-      res.json({ exists: true });
+        res.json({ exists: true });
     } else {
-      res.status(404).json({ exists: false });
+        res.status(404).json({ exists: false });
     }
-  };
+};
+
+const getVehicleReport = async (req, res) => {
+    try {
+        const { year, months } = req.body;
+
+        const selectedMonths = Array.isArray(months) ? months.map(Number) : [];
+
+        if (!year || selectedMonths.length === 0) {
+            return res.status(200).json([]);
+        }
+
+        const startDate = new Date(year, 0, 1);
+        const endDate = new Date(year, 11, 31);
+
+        const vehicles = await Vehicles.findAll();
+        const vehicleGroups = {};
+
+        for (const vehicle of vehicles) {
+            const vehType = vehicle.vehType;
+            const key = `${vehType}_${vehicle.vehDescription}`;
+
+            if (!vehicleGroups[key]) {
+                vehicleGroups[key] = {
+                    type: vehType,
+                    description: vehicle.vehDescription,
+                    belowWeight: 0,
+                    aboveWeight: 0,
+                    miles: 0,
+                    gas: 0,
+                    alt: 0,
+                    gasCost: 0,
+                    altCost: 0,
+                    maint: 0
+                };
+            }
+
+            if (vehicle.weight === '<=8500') vehicleGroups[key].belowWeight++;
+            else vehicleGroups[key].aboveWeight++;
+
+            const fuelings = await Refueling.findAll({
+                where: {
+                    NWVehicleNo: vehicle.NWVehicleNo,
+                    [Op.and]: [
+                        Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('date')), year),
+                        Sequelize.where(Sequelize.fn('MONTH', Sequelize.col('date')), { [Op.in]: months })
+                    ]
+                }
+            });
+
+            for (const f of fuelings) {
+                const fuelMonth = new Date(f.date).getMonth() + 1; 
+                if (!selectedMonths.includes(fuelMonth)) continue;
+
+                vehicleGroups[key].gas += f.fuelAdded;
+                vehicleGroups[key].gasCost += f.fuelCost;
+            }
+
+            const maintenances = await Maintainence.findAll({
+                where: {
+                    NWVehicleNo: vehicle.NWVehicleNo,
+                    [Op.and]: [
+                        Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('date')), year),
+                        Sequelize.where(Sequelize.fn('MONTH', Sequelize.col('date')), { [Op.in]: months })
+                    ]
+                }
+            });
+
+            for (const m of maintenances) {
+                const maintMonth = new Date(m.date).getMonth() + 1;
+                if (!selectedMonths.includes(maintMonth)) continue;
+
+                vehicleGroups[key].maint += m.maintainenceCost;
+            }
+
+        }
+
+        const groupedArray = Object.values(vehicleGroups).reduce((acc, curr) => {
+            if (!acc[curr.type]) acc[curr.type] = [];
+            acc[curr.type].push(curr);
+            return acc;
+        }, {});
+
+        const finalOutput = Object.keys(groupedArray).map(type => ({
+            type,
+            rows: groupedArray[type]
+        }));
+
+        res.json(finalOutput);
+    } catch (error) {
+        console.error('Error generating vehicle report:', error);
+        res.status(500).send('Internal Server Error');
+    }
+};
 
 
 
-
-module.exports = { AddVehicle, GetAllVehicles, GetRecentVehicles, getVehicleProfile, deleteVehicle, editVehicle, getVehicleRefuelingDataByYear, getVehicleMaintenanceDataByYear, checkVehicleExists }
+module.exports = { AddVehicle, GetAllVehicles, GetRecentVehicles, getVehicleProfile, deleteVehicle, editVehicle, getVehicleRefuelingDataByYear, getVehicleMaintenanceDataByYear, checkVehicleExists, getVehicleReport }
