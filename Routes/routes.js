@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 const {SignUp, Login} =  require('../Controllers/Authentication');
 const {AddUser, ShowUsers, showUserProfile, editUser, changePassword, passCheck} = require('../Controllers/Users');
-const {AddVehicle, GetAllVehicles, GetRecentVehicles, getVehicleProfile, deleteVehicle, editVehicle, getVehicleRefuelingDataByYear, getVehicleMaintenanceDataByYear, checkVehicleExists, getVehicleReport} = require('../Controllers/Vehicle');
-const { addRefueling, editRefueling, deleteRefueling, showRefueling, showRefuelingForVehicle, getMonthlyRefuelingData, getAvailableYears } = require('../Controllers/Refueling');
-const { addMaintainence, editMaintainence, deleteMaintainence, showMaintenance, showMaintenanceForVehicle, getMonthlyMaintenanceData, getAvailableMaintenanceYears} = require('../Controllers/Maintainence');
+const {AddVehicle, GetAllVehicles, GetRecentVehicles, getVehicleProfile, deleteVehicle, editVehicle, getVehicleRefuelingDataByYear, getVehicleMaintenanceDataByYear, checkVehicleExists, getVehicleReport,  getVehicleInfoReport} = require('../Controllers/Vehicle');
+const { addRefueling, editRefueling, deleteRefueling, showRefueling, showRefuelingForVehicle, getMonthlyRefuelingData, getAvailableYears, getPaginatedRefuelingReport } = require('../Controllers/Refueling');
+const { addMaintainence, editMaintainence, deleteMaintainence, showMaintenance, showMaintenanceForVehicle, getMonthlyMaintenanceData, getAvailableMaintenanceYears, getPaginatedMaintenanceReport} = require('../Controllers/Maintainence');
 const {Receipt} = require('../Controllers/ReceiptDownload')
 const { upload, makePublicRead } = require('../Controllers/S3Service');
 
@@ -43,5 +43,8 @@ router.get('/refueling/vehicle/:NWVehicleNo', getVehicleRefuelingDataByYear);
 router.get('/maintenance/vehicle/:NWVehicleNo', getVehicleMaintenanceDataByYear);
 router.get('/vehiclesCheck/:NWVehicleNo', checkVehicleExists);
 router.post('/vehicle/report', getVehicleReport)
+router.get('/vehicleInfo/info', getVehicleInfoReport)
+router.post('/refueling/report', getPaginatedRefuelingReport);
+router.post('/maintenance/report', getPaginatedMaintenanceReport);
 
 module.exports = router;

@@ -57,6 +57,8 @@ const Refueling = db.define('Refueling', {
     }
 });
 
+
+
 Users.hasMany(Refueling, { foreignKey: 'refueledBy' });
 Refueling.belongsTo(Users, { foreignKey: 'refueledBy' });
 Vehicle.hasMany(Refueling, { foreignKey: 'NWVehicleNo' });

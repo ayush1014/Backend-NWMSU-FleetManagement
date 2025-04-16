@@ -16,15 +16,12 @@ const AddVehicle = async (req, res) => {
             return res.status(409).send('Vehicle already exists');
         }
 
-        // Convert incoming date to Date object directly, handle full date string including time zone
         const dateObj = new Date(purchaseDate);
 
-        // Check if the date object is valid
         if (isNaN(dateObj.getTime())) {
             return res.status(400).send('Invalid date format');
         }
 
-        // Convert to ISO string for UTC standardized format
         const dateUTC = dateObj.toISOString();
 
         const newVehicle = await Vehicles.create({
@@ -371,6 +368,29 @@ const getVehicleReport = async (req, res) => {
     }
 };
 
+const getVehicleInfoReport = async (req, res) => {
+    try {
+      const { page = 1, limit = 20 } = req.query;
+      const offset = (parseInt(page) - 1) * parseInt(limit);
+  
+      const { count, rows } = await Vehicles.findAndCountAll({
+        offset,
+        limit: parseInt(limit),
+        order: [['purchaseDate', 'DESC']]
+      });
+  
+      res.status(200).json({
+        data: rows,
+        total: count,
+        page: parseInt(page),
+        totalPages: Math.ceil(count / limit)
+      });
+    } catch (err) {
+      console.error('Error fetching vehicle info report:', err);
+      res.status(500).send('Internal Server Error');
+    }
+  };
+  
+  
 
-
-module.exports = { AddVehicle, GetAllVehicles, GetRecentVehicles, getVehicleProfile, deleteVehicle, editVehicle, getVehicleRefuelingDataByYear, getVehicleMaintenanceDataByYear, checkVehicleExists, getVehicleReport }
+module.exports = { AddVehicle, GetAllVehicles, GetRecentVehicles, getVehicleProfile, deleteVehicle, editVehicle, getVehicleRefuelingDataByYear, getVehicleMaintenanceDataByYear, checkVehicleExists, getVehicleReport,  getVehicleInfoReport }

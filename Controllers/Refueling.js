@@ -163,7 +163,7 @@ const getAvailableYears = async (req, res) => {
         const date = new Date(record.date);
         const month = date.getMonth(); 
         const year = date.getFullYear();
-        const fiscalYear = month >= 7 ? year : year - 1;
+        const fiscalYear = month >= 6 ? year : year - 1;
   
         fiscalYearsSet.add(fiscalYear);
       });
@@ -173,7 +173,7 @@ const getAvailableYears = async (req, res) => {
         years: Array.from(fiscalYearsSet)
           .sort((a, b) => b - a)
           .map(year => ({
-            label: `Aug ${year} - Jul ${year + 1}`,
+            label: `July ${year} - June ${year + 1}`,
             value: year
           }))
       });      
@@ -189,8 +189,8 @@ const getAvailableYears = async (req, res) => {
   
     try {
       // Fiscal Year: Aug YYYY → Jul YYYY+1
-      const startDate = new Date(year, 7, 1);      // August 1st of selected year
-      const endDate = new Date(year + 1, 6, 31);   // July 31st of the next year
+      const startDate = new Date(year, 6, 1);      // August 1st of selected year
+      const endDate = new Date(year + 1, 5, 31);   // July 31st of the next year
   
       const refuelings = await Refueling.findAll({
         attributes: [
@@ -226,15 +226,57 @@ const getAvailableYears = async (req, res) => {
     }
   };
   
+  
+  const getPaginatedRefuelingReport = async (req, res) => {
+    try {
+      const { page = 1, limit = 20, fiscalYear, months } = req.body;
+      const offset = (parseInt(page) - 1) * parseInt(limit);
+  
+      const selectedMonths = Array.isArray(months) && months.length > 0 ? months : [];
+  
+      const year = parseInt(fiscalYear) || new Date().getFullYear();
+      const startDate = new Date(`${year}-07-01`);
+      const endDate = new Date(`${year + 1}-06-30`);
+  
+      const whereClause = {
+        date: {
+          [Op.between]: [startDate, endDate]
+        }
+      };
+  
+      if (selectedMonths.length > 0) {
+        whereClause[Op.and] = [
+          Sequelize.where(Sequelize.fn('MONTH', Sequelize.col('date')), {
+            [Op.in]: selectedMonths
+          })
+        ];
+      }
+  
+      const { count, rows } = await Refueling.findAndCountAll({
+        include: [
+          { model: Users, attributes: ['firstName', 'lastName', 'email'] },
+          { model: Vehicle, attributes: ['make', 'model', 'vehType', 'vehDescription'] }
+        ],
+        where: whereClause,
+        offset,
+        limit: parseInt(limit),
+        order: [['date', 'DESC']]
+      });
+  
+      res.status(200).json({
+        refuelings: rows,
+        total: count,
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(count / limit)
+      });
+    } catch (error) {
+      console.error('Error fetching paginated refueling report:', error);
+      res.status(500).send('Internal Server Error');
+    }
+  };
+  
+  
 
+  
 
-
-
-
-
-
-
-
-
-
-module.exports = { addRefueling, editRefueling, deleteRefueling, showRefueling, showRefuelingForVehicle, getMonthlyRefuelingData, getAvailableYears }
+module.exports = { addRefueling, editRefueling, deleteRefueling, showRefueling, showRefuelingForVehicle, getMonthlyRefuelingData, getAvailableYears, getPaginatedRefuelingReport }
