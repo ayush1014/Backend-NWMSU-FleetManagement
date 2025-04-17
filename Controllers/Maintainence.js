@@ -39,21 +39,64 @@ const addMaintainence = async (req, res) => {
 
 const editMaintainence = async (req, res) => {
     const { maintainenceId } = req.params;
+    const { NWVehicleNo, currentMileage, maintainenceDescription, maintainenceCost, date, maintainenceBy } = req.body;
+  
     try {
-        const updated = await Maintainence.update(req.body, {
-            where: { maintainenceId: maintainenceId }
-        });
-        if (updated) {
-            const updateMaintainence = await Maintainence.findByPk(maintainenceId);
-            res.json(updateMaintainence);
-        } else {
-            res.status(404).send('Maintainence not found');
-        }
+      const updateData = {
+        NWVehicleNo,
+        currentMileage,
+        maintainenceDescription,
+        maintainenceCost,
+        date,
+        maintainenceBy,
+        updatedAt: new Date()
+      };
+  
+      if (req.file) {
+        updateData.receiptImage = req.file.location || req.file.path; 
+      }
+  
+      const updated = await Maintainence.update(updateData, { where: { maintainenceId } });
+  
+      if (updated[0]) {
+        const updatedMaintainence = await Maintainence.findByPk(maintainenceId);
+        res.json(updatedMaintainence);
+      } else {
+        res.status(404).send('Maintainence not found');
+      }
     } catch (error) {
-        console.error('Error updating maintainence data:', error);
-        res.status(500).send('Internal Server Error');
+      console.error('Error updating maintainence data:', error);
+      res.status(500).send('Internal Server Error');
     }
-};
+  };
+  
+
+const getMaintenanceById = async (req, res) => {
+    const { maintenanceId } = req.params;
+  
+    try {
+      const maintenance = await Maintainence.findByPk(maintenanceId, {
+        include: [
+          {
+            model: Users,
+            attributes: ['email', 'firstName', 'lastName', 'profile_pic']
+          },
+          {
+            model: Vehicle
+          }
+        ]
+      });
+  
+      if (!maintenance) {
+        return res.status(404).send('Maintenance not found');
+      }
+  
+      res.status(200).json(maintenance);
+    } catch (error) {
+      console.error('Error fetching Maintenance by ID:', error);
+      res.status(500).send('Internal Server Error');
+    }
+  };
 
 const deleteMaintainence = async (req, res) => {
     const { maintainenceId } = req.params;
@@ -248,4 +291,4 @@ const getAvailableMaintenanceYears = async (req, res) => {
 
 
 
-module.exports = { addMaintainence, editMaintainence, deleteMaintainence, showMaintenance, showMaintenanceForVehicle, getAvailableMaintenanceYears, getMonthlyMaintenanceData, getPaginatedMaintenanceReport }
+module.exports = { addMaintainence, editMaintainence, deleteMaintainence, showMaintenance, showMaintenanceForVehicle, getAvailableMaintenanceYears, getMonthlyMaintenanceData, getPaginatedMaintenanceReport, getMaintenanceById }

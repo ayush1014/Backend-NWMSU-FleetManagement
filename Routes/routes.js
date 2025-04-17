@@ -3,8 +3,8 @@ const router = express.Router();
 const {SignUp, Login} =  require('../Controllers/Authentication');
 const {AddUser, ShowUsers, showUserProfile, editUser, changePassword, passCheck} = require('../Controllers/Users');
 const {AddVehicle, GetAllVehicles, GetRecentVehicles, getVehicleProfile, deleteVehicle, editVehicle, getVehicleRefuelingDataByYear, getVehicleMaintenanceDataByYear, checkVehicleExists, getVehicleReport,  getVehicleInfoReport} = require('../Controllers/Vehicle');
-const { addRefueling, editRefueling, deleteRefueling, showRefueling, showRefuelingForVehicle, getMonthlyRefuelingData, getAvailableYears, getPaginatedRefuelingReport } = require('../Controllers/Refueling');
-const { addMaintainence, editMaintainence, deleteMaintainence, showMaintenance, showMaintenanceForVehicle, getMonthlyMaintenanceData, getAvailableMaintenanceYears, getPaginatedMaintenanceReport} = require('../Controllers/Maintainence');
+const { addRefueling, editRefueling, deleteRefueling, showRefueling, showRefuelingForVehicle, getMonthlyRefuelingData, getAvailableYears, getPaginatedRefuelingReport, getRefuelingById } = require('../Controllers/Refueling');
+const { addMaintainence, editMaintainence, deleteMaintainence, showMaintenance, showMaintenanceForVehicle, getMonthlyMaintenanceData, getAvailableMaintenanceYears, getPaginatedMaintenanceReport, getMaintenanceById} = require('../Controllers/Maintainence');
 const {Receipt} = require('../Controllers/ReceiptDownload')
 const { upload, makePublicRead } = require('../Controllers/S3Service');
 
@@ -46,5 +46,8 @@ router.post('/vehicle/report', getVehicleReport)
 router.get('/vehicleInfo/info', getVehicleInfoReport)
 router.post('/refueling/report', getPaginatedRefuelingReport);
 router.post('/maintenance/report', getPaginatedMaintenanceReport);
+router.get('/refueling/:refuelingId', getRefuelingById);
+router.get('/maintenance/:maintenanceId', getMaintenanceById);
+
 
 module.exports = router;
