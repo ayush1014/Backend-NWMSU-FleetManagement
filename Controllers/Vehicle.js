@@ -6,23 +6,20 @@ const Maintainence = require('../Models/Maintainence');
 
 const AddVehicle = async (req, res) => {
     try {
-        const { NWVehicleNo, VIN, modelYear, make, model, purchaseDate, startingMileage, weight, vehType, vehDescription, isExempt, vehiclePic, vehicleDepartment, color, licensePlate, addBy } = req.body;
+        const {
+            NWVehicleNo, VIN, modelYear, make, model, purchaseDate, startingMileage,
+            weight, vehType, vehDescription, isExempt, vehicleDepartment, color, licensePlate, addBy
+        } = req.body;
 
-        const vehCheck = await Vehicles.findOne({
-            where: { NWVehicleNo }
-        });
-
-        if (vehCheck) {
-            return res.status(409).send('Vehicle already exists');
+        const existingVehicle = await Vehicles.findOne({ where: { NWVehicleNo } });
+        if (existingVehicle) {
+            return res.status(409).json({ message: 'NW Vehicle ID already exists' });
         }
 
         const dateObj = new Date(purchaseDate);
-
         if (isNaN(dateObj.getTime())) {
-            return res.status(400).send('Invalid date format');
+            return res.status(400).json({ message: 'Invalid date format' });
         }
-
-        const dateUTC = dateObj.toISOString();
 
         const newVehicle = await Vehicles.create({
             NWVehicleNo,
@@ -30,7 +27,7 @@ const AddVehicle = async (req, res) => {
             modelYear,
             make,
             model,
-            purchaseDate: dateUTC,
+            purchaseDate: dateObj.toISOString(),
             startingMileage,
             weight,
             vehType,
@@ -43,13 +40,13 @@ const AddVehicle = async (req, res) => {
             addBy
         });
 
-        res.status(201).json(newVehicle);
-
+        return res.status(201).json(newVehicle);
     } catch (err) {
         console.error('Internal server error', err);
-        res.status(500).send('Internal Server Error');
+        return res.status(500).json({ message: 'Internal Server Error' });
     }
 };
+
 
 
 
@@ -324,7 +321,7 @@ const getVehicleReport = async (req, res) => {
             });
 
             for (const f of fuelings) {
-                const fuelMonth = new Date(f.date).getMonth() + 1; 
+                const fuelMonth = new Date(f.date).getMonth() + 1;
                 if (!selectedMonths.includes(fuelMonth)) continue;
 
                 vehicleGroups[key].gas += f.fuelAdded;
@@ -370,27 +367,27 @@ const getVehicleReport = async (req, res) => {
 
 const getVehicleInfoReport = async (req, res) => {
     try {
-      const { page = 1, limit = 20 } = req.query;
-      const offset = (parseInt(page) - 1) * parseInt(limit);
-  
-      const { count, rows } = await Vehicles.findAndCountAll({
-        offset,
-        limit: parseInt(limit),
-        order: [['purchaseDate', 'DESC']]
-      });
-  
-      res.status(200).json({
-        data: rows,
-        total: count,
-        page: parseInt(page),
-        totalPages: Math.ceil(count / limit)
-      });
-    } catch (err) {
-      console.error('Error fetching vehicle info report:', err);
-      res.status(500).send('Internal Server Error');
-    }
-  };
-  
-  
+        const { page = 1, limit = 20 } = req.query;
+        const offset = (parseInt(page) - 1) * parseInt(limit);
 
-module.exports = { AddVehicle, GetAllVehicles, GetRecentVehicles, getVehicleProfile, deleteVehicle, editVehicle, getVehicleRefuelingDataByYear, getVehicleMaintenanceDataByYear, checkVehicleExists, getVehicleReport,  getVehicleInfoReport }
+        const { count, rows } = await Vehicles.findAndCountAll({
+            offset,
+            limit: parseInt(limit),
+            order: [['purchaseDate', 'DESC']]
+        });
+
+        res.status(200).json({
+            data: rows,
+            total: count,
+            page: parseInt(page),
+            totalPages: Math.ceil(count / limit)
+        });
+    } catch (err) {
+        console.error('Error fetching vehicle info report:', err);
+        res.status(500).send('Internal Server Error');
+    }
+};
+
+
+
+module.exports = { AddVehicle, GetAllVehicles, GetRecentVehicles, getVehicleProfile, deleteVehicle, editVehicle, getVehicleRefuelingDataByYear, getVehicleMaintenanceDataByYear, checkVehicleExists, getVehicleReport, getVehicleInfoReport }

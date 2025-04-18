@@ -185,26 +185,6 @@ const getRefuelingById = async (req, res) => {
   }
 };
 
-
-// const getAvailableYears = async (req, res) => {
-//     try {
-//         const years = await Refueling.findAll({
-//             attributes: [
-//                 [Sequelize.fn('DISTINCT', Sequelize.fn('YEAR', Sequelize.col('date'))), 'year']
-//             ],
-//             order: [
-//                 [Sequelize.literal('year'), 'DESC']
-//             ]
-//         });
-
-//         const yearList = years.map(item => item.dataValues.year);
-//         res.json({ years: yearList });
-//     } catch (error) {
-//         console.error('Error fetching available years:', error);
-//         res.status(500).send('Internal Server Error');
-//     }
-// };
-
 const getAvailableYears = async (req, res) => {
   try {
     const refueling = await Refueling.findAll({
