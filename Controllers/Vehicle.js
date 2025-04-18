@@ -367,7 +367,15 @@ const getVehicleReport = async (req, res) => {
 
 const getVehicleInfoReport = async (req, res) => {
     try {
-        const { page = 1, limit = 20 } = req.query;
+        const { page = 1, limit = 20, all } = req.query;
+
+        if (all === 'true') {
+            const allVehicles = await Vehicles.findAll({
+                order: [['purchaseDate', 'DESC']]
+            });
+            return res.status(200).json({ data: allVehicles });
+        }
+
         const offset = (parseInt(page) - 1) * parseInt(limit);
 
         const { count, rows } = await Vehicles.findAndCountAll({
