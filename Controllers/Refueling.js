@@ -27,6 +27,13 @@ const addRefueling = async (req, res) => {
     const dateUTC = dateObj.toISOString();
 
 
+    if (currentMileage) {
+      await Vehicle.update(
+        { currentMileage },
+        { where: { NWVehicleNo } }
+      )
+    }
+
     const newRefueling = await Refueling.create({
       NWVehicleNo,
       date: dateUTC,
@@ -72,6 +79,25 @@ const editRefueling = async (req, res) => {
   }
 
   try {
+    const refuelingRecord = await Refueling.findByPk(refuelingId);
+    if (!refuelingRecord) {
+      return res.status(404).send('Refueling not found');
+    }
+
+    const vehicle = await Vehicle.findByPk(NWVehicleNo);
+    if (!vehicle) {
+      return res.status(404).send('Vehicle not found');
+    }
+
+    if (currentMileage < vehicle.currentMileage) {
+      return res.status(400).send('New mileage cannot be less than current vehicle mileage');
+    }
+
+    await Vehicle.update(
+      { currentMileage },
+      { where: { NWVehicleNo } }
+    );
+
     const updated = await Refueling.update(payload, {
       where: { refuelingId }
     });
@@ -80,13 +106,14 @@ const editRefueling = async (req, res) => {
       const updatedRefueling = await Refueling.findByPk(refuelingId);
       res.json(updatedRefueling);
     } else {
-      res.status(404).send('Refueling not found');
+      res.status(404).send('Refueling not updated');
     }
   } catch (error) {
     console.error('Error updating refueling data:', error);
     res.status(500).send('Internal Server Error');
   }
 };
+
 
 
 const deleteRefueling = async (req, res) => {

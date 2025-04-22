@@ -46,8 +46,13 @@ const Vehicles = db.define('Vehicle', {
         type: DataTypes.INTEGER,
         allowNull: false,
         validate: {
-            min: 0 //ensures only non-negative values
+            min: 0 
         }
+    },
+
+    currentMileage: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
     },
 
     weight: {
