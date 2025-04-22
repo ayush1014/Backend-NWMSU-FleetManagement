@@ -52,7 +52,6 @@ const Vehicles = db.define('Vehicle', {
 
     currentMileage: {
         type: DataTypes.INTEGER,
-        allowNull: true,
     },
 
     weight: {
