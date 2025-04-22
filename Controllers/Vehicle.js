@@ -37,7 +37,8 @@ const AddVehicle = async (req, res) => {
             vehicleDepartment,
             color,
             licensePlate,
-            addBy
+            addBy,
+            currentMileage: null
         });
 
         return res.status(201).json(newVehicle);
