@@ -87,7 +87,28 @@ const showUserProfile = async(req,res)=>{
         const userProfile = await User.findOne({
             where:{
                 email: email
-            }
+            },
+            include: [
+                {
+                    model: Refueling,
+                    include: [
+                        {
+                            model: Vehicle,
+                        }
+                    ]
+                },
+                {
+                    model: Maintainence,
+                    include: [
+                        {
+                            model: Vehicle,
+                        }
+                    ]
+                },
+                {
+                    model: Vehicle
+                }
+            ]
         })
         res.status(200).json(userProfile);
     }catch(error){
